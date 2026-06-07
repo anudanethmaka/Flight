@@ -223,7 +223,7 @@ export const chatWithAssistant = async (req: Request, res: Response) => {
   const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyBKrzvtzT3wjhFaeFlpz1ptARXevBBP2bk';
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `You are an AI Flight Search Assistant. 
 The user is asking: "${message}". 
@@ -263,11 +263,11 @@ Return ONLY a raw JSON object with no markdown formatting. It must have the keys
     // Actually our frontend expects response.data.flights or response.data.Flights. Let's check `AIAssistant.tsx`.
     // Oh, my frontend `AIAssistant.tsx` used `res.data.Flights`. I should return the exact same schema.
     const responsePayload = {
-      Message: `I found ${flights.length} flight(s) matching your request.`,
-      Departure: departure || "",
-      Arrival: arrival || "",
-      Date: date || "",
-      Flights: flights.map(f => ({
+      message: `I found ${flights.length} flight(s) matching your request.`,
+      departure: departure || "",
+      arrival: arrival || "",
+      date: date || "",
+      flights: flights.map(f => ({
         id: f._id,
         flightNumber: f.flightNumber,
         departureAirport: f.departureAirport,
