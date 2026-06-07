@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "Hq2y9hCoGjyJCfgYWqUcpijI/CRxwJOCsB2mPyxy49M=",
+  "Source": "SkyLink.Gateway",
+  "BasePath": "_content/SkyLink.Gateway",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "cprFq6bvdAENR3Ypykwb4LA04rkIBIMNr68GiMzGBY0=",
+  "Source": "SkyLink.FlightService",
+  "BasePath": "_content/SkyLink.FlightService",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
