@@ -226,10 +226,19 @@ export const chatWithAssistant = async (req: Request, res: Response) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
     const prompt = `You are an AI Flight Search Assistant. 
-The user is asking: "${message}". 
-Extract the departure airport, arrival airport, and date of travel.
-Crucially, you MUST convert the airport names or cities into their standard 3-letter IATA codes (e.g. London -> LHR, Singapore -> SIN, New York -> JFK, Dubai -> DXB, etc.).
-Return ONLY a raw JSON object with no markdown formatting. It must have the keys "departure", "arrival", and "date" (in YYYY-MM-DD format). If a field cannot be determined, set it to an empty string.`;
+The user is saying: "${message}". 
+Determine if the user is asking to search for flights or just chatting.
+If they are searching for flights, extract the departure airport, arrival airport, and date of travel. Crucially, you MUST convert the airport names or cities into their standard 3-letter IATA codes (e.g. London -> LHR, Singapore -> SIN, New York -> JFK, Dubai -> DXB, etc.).
+If they are just chatting or greeting, provide a helpful and polite conversational response in the "replyMessage" field.
+
+Return ONLY a raw JSON object with no markdown formatting. It must have the following keys:
+- "isSearch": boolean (true if searching for flights, false otherwise)
+- "replyMessage": string (A conversational response to the user, e.g. greeting them or asking for more details.)
+- "departure": string
+- "arrival": string
+- "date": string (in YYYY-MM-DD format)
+
+If a field cannot be determined, set it to an empty string.`;
 
     const result = await model.generateContent(prompt);
     let jsonText = result.response.text();
@@ -244,8 +253,17 @@ Return ONLY a raw JSON object with no markdown formatting. It must have the keys
       return res.status(500).json({ message: 'AI failed to process the request.' });
     }
 
-    const { departure, arrival, date } = searchParams;
+    const { isSearch, replyMessage, departure, arrival, date } = searchParams;
     
+    if (isSearch === false) {
+      return res.status(200).json({
+        message: replyMessage || "How can I help you today?",
+        departure: "",
+        arrival: "",
+        date: ""
+      });
+    }
+
     const query: any = {};
     if (departure) query.departureAirport = { $regex: new RegExp(String(departure), 'i') };
     if (arrival) query.arrivalAirport = { $regex: new RegExp(String(arrival), 'i') };
@@ -260,11 +278,8 @@ Return ONLY a raw JSON object with no markdown formatting. It must have the keys
 
     const flights = await Flight.find(query).sort({ departureDate: 1, departureTime: 1 }).limit(20);
     
-    // Convert to lowercase keys because C# serialized to TitleCase, but now frontend expects uppercase for "Flights" property only, wait...
-    // Actually our frontend expects response.data.flights or response.data.Flights. Let's check `AIAssistant.tsx`.
-    // Oh, my frontend `AIAssistant.tsx` used `res.data.Flights`. I should return the exact same schema.
     const responsePayload = {
-      message: `I found ${flights.length} flight(s) matching your request.`,
+      message: replyMessage || `I found ${flights.length} flight(s) matching your request.`,
       departure: departure || "",
       arrival: arrival || "",
       date: date || "",
