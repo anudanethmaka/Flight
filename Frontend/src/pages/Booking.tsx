@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { flightApi, bookingApi } from '../services/api';
-import { Plane, Calendar, Clock, DollarSign, User, Plus, Trash2, CheckCircle, ArrowRight } from 'lucide-react';
+import { Plane, User, Plus, Trash2, CheckCircle, ArrowRight } from 'lucide-react';
 
 interface PassengerForm {
   passengerName: string;

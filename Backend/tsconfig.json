@@ -1,0 +1,11 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "services/gateway" },
+    { "path": "services/auth-service" },
+    { "path": "services/flight-service" },
+    { "path": "services/booking-service" },
+    { "path": "services/notification-service" }
+  ]
+}
