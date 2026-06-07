@@ -8,6 +8,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@skylink/shared": "*",
     "axios": "^1.6.8",
     "cors": "^2.8.5",

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import axios from 'axios';
 import { Flight } from '../models/Flight';
 import { CreateFlightDto, UpdateFlightDto } from '@skylink/shared';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const getNotificationServiceUrl = () => process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:5014';
 
@@ -212,5 +213,78 @@ const triggerFlightStatusNotification = async (flight: any) => {
     await axios.post(`${notificationUrl}/api/notifications/flight-update`, payload);
   } catch (error: any) {
     console.error(`[FlightService] Failed to trigger notification for flight status change:`, error.message);
+  }
+};
+
+export const chatWithAssistant = async (req: Request, res: Response) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ message: 'Message is required' });
+
+  const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyBKrzvtzT3wjhFaeFlpz1ptARXevBBP2bk';
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
+
+    const prompt = `You are an AI Flight Search Assistant. 
+The user is asking: "${message}". 
+Extract the departure airport, arrival airport, and date of travel.
+Return ONLY a raw JSON object with no markdown formatting. It must have the keys "departure", "arrival", and "date" (in YYYY-MM-DD format). If a field cannot be determined, set it to an empty string.`;
+
+    const result = await model.generateContent(prompt);
+    let jsonText = result.response.text();
+    
+    jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    let searchParams;
+    try {
+      searchParams = JSON.parse(jsonText);
+    } catch (e) {
+      console.error("Failed to parse Gemini output:", jsonText);
+      return res.status(500).json({ message: 'AI failed to process the request.' });
+    }
+
+    const { departure, arrival, date } = searchParams;
+    
+    const query: any = {};
+    if (departure) query.departureAirport = { $regex: new RegExp(String(departure), 'i') };
+    if (arrival) query.arrivalAirport = { $regex: new RegExp(String(arrival), 'i') };
+    if (date) {
+      const searchDate = new Date(String(date));
+      if (!isNaN(searchDate.getTime())) {
+        const startOfDay = new Date(searchDate.setUTCHours(0, 0, 0, 0));
+        const endOfDay = new Date(searchDate.setUTCHours(23, 59, 59, 999));
+        query.departureDate = { $gte: startOfDay, $lte: endOfDay };
+      }
+    }
+
+    const flights = await Flight.find(query).sort({ departureDate: 1, departureTime: 1 }).limit(20);
+    
+    // Convert to lowercase keys because C# serialized to TitleCase, but now frontend expects uppercase for "Flights" property only, wait...
+    // Actually our frontend expects response.data.flights or response.data.Flights. Let's check `AIAssistant.tsx`.
+    // Oh, my frontend `AIAssistant.tsx` used `res.data.Flights`. I should return the exact same schema.
+    const responsePayload = {
+      Message: `I found ${flights.length} flight(s) matching your request.`,
+      Departure: departure || "",
+      Arrival: arrival || "",
+      Date: date || "",
+      Flights: flights.map(f => ({
+        id: f._id,
+        flightNumber: f.flightNumber,
+        departureAirport: f.departureAirport,
+        arrivalAirport: f.arrivalAirport,
+        departureDate: f.departureDate,
+        departureTime: f.departureTime,
+        arrivalTime: f.arrivalTime,
+        totalSeats: f.totalSeats,
+        availableSeats: f.availableSeats,
+        price: f.price,
+        flightStatus: f.flightStatus
+      }))
+    };
+    
+    return res.status(200).json(responsePayload);
+  } catch (error: any) {
+    console.error('AI Assistant Error:', error);
+    return res.status(500).json({ message: error.message });
   }
 };
