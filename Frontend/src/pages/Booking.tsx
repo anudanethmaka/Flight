@@ -1,4 +1,4 @@
-using System; // Placeholder for formatting, this is a TypeScript file.
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { flightApi, bookingApi } from '../services/api';

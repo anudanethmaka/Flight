@@ -1,4 +1,4 @@
-using System; // Placeholder for formatting, this is a TypeScript file.
+
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5010'; // API Gateway port
@@ -53,6 +53,7 @@ export const flightApi = {
   create: (data: any) => api.post('/api/flights', data),
   update: (id: number, data: any) => api.put(`/api/flights/${id}`, data),
   delete: (id: number) => api.delete(`/api/flights/${id}`),
+  chatWithAssistant: (message: string) => api.post('/api/flights/assistant/chat', { message }),
 };
 
 // --- Booking Service APIs ---
