@@ -228,6 +228,7 @@ export const chatWithAssistant = async (req: Request, res: Response) => {
     const prompt = `You are an AI Flight Search Assistant. 
 The user is asking: "${message}". 
 Extract the departure airport, arrival airport, and date of travel.
+Crucially, you MUST convert the airport names or cities into their standard 3-letter IATA codes (e.g. London -> LHR, Singapore -> SIN, New York -> JFK, Dubai -> DXB, etc.).
 Return ONLY a raw JSON object with no markdown formatting. It must have the keys "departure", "arrival", and "date" (in YYYY-MM-DD format). If a field cannot be determined, set it to an empty string.`;
 
     const result = await model.generateContent(prompt);
