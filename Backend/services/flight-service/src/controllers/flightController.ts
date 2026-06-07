@@ -223,7 +223,7 @@ export const chatWithAssistant = async (req: Request, res: Response) => {
   const apiKey = process.env.GEMINI_API_KEY || 'AIzaSyBKrzvtzT3wjhFaeFlpz1ptARXevBBP2bk';
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
     const prompt = `You are an AI Flight Search Assistant. 
 The user is asking: "${message}". 
