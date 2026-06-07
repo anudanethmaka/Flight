@@ -1,3 +1,5 @@
+import 'express';
+
 export type Role = 'Passenger' | 'Staff' | 'Administrator';
 
 export interface JwtPayload {

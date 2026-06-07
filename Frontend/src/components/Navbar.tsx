@@ -18,8 +18,13 @@ const Navbar: React.FC = () => {
     try {
       const response = await notificationApi.getMyNotifications();
       setNotifications(response.data);
-    } catch (err) {
-      console.error('Failed to load notifications', err);
+    } catch (err: any) {
+      if (err.response && err.response.status === 401) {
+        console.warn('Session expired. Logging out.');
+        logout();
+      } else {
+        console.error('Failed to load notifications', err);
+      }
     }
   };
 

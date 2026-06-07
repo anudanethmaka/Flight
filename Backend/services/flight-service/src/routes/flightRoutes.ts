@@ -15,4 +15,7 @@ router.delete('/:id', authenticate, requireRole('Administrator'), flightControll
 // Internal query to adjust available seats
 router.put('/:id/seats', flightController.adjustSeats);
 
+// AI Assistant
+router.post('/assistant/chat', flightController.chatWithAssistant);
+
 export default router;

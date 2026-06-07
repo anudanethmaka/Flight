@@ -31,43 +31,59 @@ mongoose.connect(mongoUri)
 
     // Seed default flights if none exist
     try {
+      await Flight.deleteMany({}); // Clear existing flights for fresh random seed
       const flightCount = await Flight.countDocuments();
       if (flightCount === 0) {
         console.log('[FlightService] Seeding default flights...');
         
-        const date1 = new Date();
-        date1.setDate(date1.getDate() + 3); // 3 days from now
-        
-        const date2 = new Date();
-        date2.setDate(date2.getDate() + 5); // 5 days from now
+        const airports = ['CMB', 'SIN', 'LHR', 'JFK', 'DXB', 'SYD', 'NRT', 'FRA', 'YYZ', 'HKG', 'DEL', 'CDG', 'AMS'];
+        const statuses = ['Scheduled', 'Delayed', 'Cancelled'];
+        const flightsToSeed = [];
 
-        await Flight.insertMany([
-          {
-            flightNumber: 'SLK-101',
-            departureAirport: 'CMB',
-            arrivalAirport: 'SIN',
-            departureDate: date1,
-            departureTime: '08:30',
-            arrivalTime: '14:50',
-            totalSeats: 100,
-            availableSeats: 100,
-            price: 350.00,
-            flightStatus: 'Scheduled'
-          },
-          {
-            flightNumber: 'SLK-202',
-            departureAirport: 'SIN',
-            arrivalAirport: 'LHR',
-            departureDate: date2,
-            departureTime: '22:15',
-            arrivalTime: '05:40',
-            totalSeats: 150,
-            availableSeats: 150,
-            price: 850.00,
-            flightStatus: 'Scheduled'
+        for (let i = 1; i <= 300; i++) {
+          const depAirport = airports[Math.floor(Math.random() * airports.length)];
+          let arrAirport = airports[Math.floor(Math.random() * airports.length)];
+          while (arrAirport === depAirport) {
+            arrAirport = airports[Math.floor(Math.random() * airports.length)];
           }
-        ]);
-        console.log('[FlightService] Default flights seeded.');
+
+          const dateOffset = Math.floor(Math.random() * 30); // 0 to 30 days from now
+          const flightDate = new Date();
+          flightDate.setDate(flightDate.getDate() + dateOffset);
+
+          const depHour = Math.floor(Math.random() * 24);
+          const depMinute = Math.floor(Math.random() * 60);
+          const departureTime = `${depHour.toString().padStart(2, '0')}:${depMinute.toString().padStart(2, '0')}`;
+
+          const arrHour = (depHour + Math.floor(Math.random() * 12) + 1) % 24;
+          const arrMinute = Math.floor(Math.random() * 60);
+          const arrivalTime = `${arrHour.toString().padStart(2, '0')}:${arrMinute.toString().padStart(2, '0')}`;
+
+          const totalSeats = 50 + Math.floor(Math.random() * 250); // 50 to 300 seats
+          const availableSeats = Math.floor(Math.random() * totalSeats); // 0 to totalSeats
+          const price = 100 + Math.floor(Math.random() * 1400); // 100 to 1500
+
+          const statusRoll = Math.random();
+          let flightStatus = 'Scheduled';
+          if (statusRoll > 0.8) flightStatus = 'Delayed';
+          if (statusRoll > 0.95) flightStatus = 'Cancelled';
+
+          flightsToSeed.push({
+            flightNumber: `SLK-${100 + i}`,
+            departureAirport: depAirport,
+            arrivalAirport: arrAirport,
+            departureDate: flightDate,
+            departureTime,
+            arrivalTime,
+            totalSeats,
+            availableSeats,
+            price,
+            flightStatus
+          });
+        }
+
+        await Flight.insertMany(flightsToSeed);
+        console.log(`[FlightService] Successfully seeded ${flightsToSeed.length} random flights.`);
       }
     } catch (seedErr) {
       console.error('[FlightService] Seeding error:', seedErr);

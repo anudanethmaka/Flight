@@ -20,65 +20,41 @@ namespace SkyLink.FlightService.Data
                 .Property(f => f.Price)
                 .HasPrecision(18, 2);
 
-            // Seed Sample Flights
-            modelBuilder.Entity<Flight>().HasData(
-                new Flight
+            // Generate Random Flights
+            var airports = new[] { "LHR (London)", "JFK (New York)", "SIN (Singapore)", "DXB (Dubai)", "SYD (Sydney)", "NRT (Tokyo)", "CDG (Paris)", "FRA (Frankfurt)", "LAX (Los Angeles)", "CMB (Colombo)" };
+            var statuses = new[] { "Scheduled", "Scheduled", "Scheduled", "Scheduled", "Scheduled", "Delayed", "Boarding" };
+            
+            var flights = new List<Flight>();
+            var random = new Random(12345); // deterministic seed so migrations don't constantly change
+
+            for (int i = 1; i <= 300; i++)
+            {
+                var depIdx = random.Next(airports.Length);
+                int arrIdx;
+                do { arrIdx = random.Next(airports.Length); } while (arrIdx == depIdx);
+
+                var depDate = DateTime.Today.AddDays(random.Next(0, 30));
+                
+                int totalSeats = random.Next(150, 350);
+                int availableSeats = random.Next(0, totalSeats);
+
+                flights.Add(new Flight
                 {
-                    Id = 1,
-                    FlightNumber = "SL-101",
-                    DepartureAirport = "CMB (Colombo)",
-                    ArrivalAirport = "SIN (Singapore)",
-                    DepartureDate = DateTime.Today.AddDays(1),
-                    DepartureTime = "07:30",
-                    ArrivalTime = "13:50",
-                    TotalSeats = 180,
-                    AvailableSeats = 178,
-                    Price = 350.00m,
-                    FlightStatus = "Scheduled"
-                },
-                new Flight
-                {
-                    Id = 2,
-                    FlightNumber = "SL-202",
-                    DepartureAirport = "CMB (Colombo)",
-                    ArrivalAirport = "LHR (London)",
-                    DepartureDate = DateTime.Today.AddDays(2),
-                    DepartureTime = "12:15",
-                    ArrivalTime = "19:30",
-                    TotalSeats = 250,
-                    AvailableSeats = 245,
-                    Price = 780.00m,
-                    FlightStatus = "Scheduled"
-                },
-                new Flight
-                {
-                    Id = 3,
-                    FlightNumber = "SL-303",
-                    DepartureAirport = "JFK (New York)",
-                    ArrivalAirport = "LHR (London)",
-                    DepartureDate = DateTime.Today,
-                    DepartureTime = "21:00",
-                    ArrivalTime = "09:00",
-                    TotalSeats = 300,
-                    AvailableSeats = 290,
-                    Price = 620.00m,
-                    FlightStatus = "Delayed"
-                },
-                new Flight
-                {
-                    Id = 4,
-                    FlightNumber = "SL-404",
-                    DepartureAirport = "SIN (Singapore)",
-                    ArrivalAirport = "HND (Tokyo)",
-                    DepartureDate = DateTime.Today.AddDays(3),
-                    DepartureTime = "23:55",
-                    ArrivalTime = "07:45",
-                    TotalSeats = 200,
-                    AvailableSeats = 200,
-                    Price = 450.00m,
-                    FlightStatus = "Scheduled"
-                }
-            );
+                    Id = i,
+                    FlightNumber = $"SL-{random.Next(100, 999)}",
+                    DepartureAirport = airports[depIdx],
+                    ArrivalAirport = airports[arrIdx],
+                    DepartureDate = depDate,
+                    DepartureTime = $"{random.Next(0, 24):D2}:{random.Next(0, 60):D2}",
+                    ArrivalTime = $"{random.Next(0, 24):D2}:{random.Next(0, 60):D2}",
+                    TotalSeats = totalSeats,
+                    AvailableSeats = availableSeats,
+                    Price = Math.Round((decimal)(random.NextDouble() * 1050 + 150), 2),
+                    FlightStatus = statuses[random.Next(statuses.Length)]
+                });
+            }
+
+            modelBuilder.Entity<Flight>().HasData(flights);
         }
     }
 }
