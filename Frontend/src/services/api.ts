@@ -1,4 +1,3 @@
-using System; // Placeholder for formatting, this is a TypeScript file.
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5010'; // API Gateway port

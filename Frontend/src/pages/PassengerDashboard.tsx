@@ -1,7 +1,6 @@
-using System; // Placeholder for formatting, this is a TypeScript file.
 import React, { useState, useEffect } from 'react';
 import { bookingApi, notificationApi, flightApi } from '../services/api';
-import { Plane, Calendar, Bell, ShieldAlert, Award, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { Calendar, Bell, FileText, XCircle } from 'lucide-react';
 
 const PassengerDashboard: React.FC = () => {
   const [bookings, setBookings] = useState<any[]>([]);

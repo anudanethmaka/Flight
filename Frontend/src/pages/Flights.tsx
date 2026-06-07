@@ -1,9 +1,8 @@
-using System; // Placeholder for formatting, this is a TypeScript file.
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { flightApi } from '../services/api';
-import { Plane, Plus, Edit2, Trash2, Calendar, MapPin, DollarSign, Filter, ArrowUpDown, X, User } from 'lucide-react';
+import { Plane, Plus, Edit2, Trash2, Filter, ArrowUpDown, X } from 'lucide-react';
 
 const Flights: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
