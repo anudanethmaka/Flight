@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/SkyLink.Gateway.props" />
-</Project>
