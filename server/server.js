@@ -14,7 +14,7 @@ app.use(express.json());
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 // Routes will be mounted here by each developer as they complete their module
-// app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 // app.use('/api/flights', require('./routes/flightRoutes'));
 // app.use('/api/bookings', require('./routes/bookingRoutes'));
 // app.use('/api/notifications', require('./routes/notificationRoutes'));
