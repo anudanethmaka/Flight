@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/ui/Layout';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import ChatWidget from '../components/chatbot/ChatWidget';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -90,8 +91,8 @@ export default function LandingPage() {
         </Card>
       </div>
 
-      {/* Chatbot Widget Placeholder — Dev 4 will implement ChatWidget here */}
-      <div id="chatbot-placeholder" />
+      {/* Chatbot Widget */}
+      <ChatWidget />
     </Layout>
   );
 }
