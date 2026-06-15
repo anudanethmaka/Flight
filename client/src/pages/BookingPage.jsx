@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../../services/api';
+import api from '../services/api';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';

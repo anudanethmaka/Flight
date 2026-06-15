@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import api from '../../services/api';
+import api from '../services/api';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
 import Alert from '../components/ui/Alert';
