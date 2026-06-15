@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
 import Input from '../components/ui/Input';
@@ -9,10 +10,11 @@ import api from '../services/api';
 
 export default function RegisterPage() {
   const [form, setForm] = useState({ name: '', email: '', password: '', phone: '' });
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,18 +23,20 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     setSuccess('');
     setLoading(true);
 
     try {
-      await api.post('/auth/register', form);
-      setSuccess('Account created successfully! Redirecting to login page...');
+      const { data } = await api.post('/auth/register', form);
+      // Dev 2 logic: login immediately after register
+      login(data.token, data.user);
+      setSuccess('Account created successfully! Redirecting...');
       setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+        navigate('/dashboard');
+      }, 1500);
     } catch (err) {
-      console.error(err);
+      console.error('Registration error:', err);
       setError(err.response?.data?.message || 'Failed to create account. Please try again.');
     } finally {
       setLoading(false);

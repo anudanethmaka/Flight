@@ -11,7 +11,7 @@ import api from '../services/api';
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   
   const { login } = useAuth();
@@ -19,7 +19,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError(null);
     setLoading(true);
 
     try {
@@ -32,7 +32,7 @@ export default function LoginPage() {
         navigate('/dashboard');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Login error:', err);
       setError(err.response?.data?.message || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
@@ -40,7 +40,7 @@ export default function LoginPage() {
   };
 
   const handleDemoAdmin = async () => {
-    setError('');
+    setError(null);
     setLoading(true);
     try {
       const { data } = await api.post('/auth/login', {
