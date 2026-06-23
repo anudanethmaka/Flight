@@ -164,7 +164,7 @@ skylink/
 
 ### `server/.env`
 ```
-PORT=5000
+PORT=5001
 MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/skylink
 JWT_SECRET=your_jwt_secret_here
 JWT_EXPIRES_IN=7d
@@ -174,7 +174,7 @@ GEMINI_API_KEY=your_gemini_api_key_here
 
 ### `client/.env`
 ```
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=http://localhost:5001/api
 ```
 
 > Each developer should copy `.env.example` (committed to the repo without real secrets) into their own `.env` (gitignored).
@@ -515,7 +515,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use(require('./middleware/errorMiddleware'));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 ```
 

@@ -34,7 +34,7 @@ export default function UserDashboardPage() {
       const timer = setTimeout(() => {
         setSuccessMessage('');
         window.history.replaceState({}, document.title);
-      }, 5000);
+      }, 5001);
       return () => clearTimeout(timer);
     }
   }, [location.state]);
