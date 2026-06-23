@@ -28,3 +28,10 @@ yarn-error.log*
 
 # Coverage
 coverage/
+
+# Lock files — project uses npm only (package-lock.json)
+pnpm-lock.yaml
+yarn.lock
+
+# Vite local dev cache
+.vite/
