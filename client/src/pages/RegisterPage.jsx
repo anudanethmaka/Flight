@@ -46,11 +46,11 @@ export default function RegisterPage() {
   return (
     <Layout>
       <div className="max-w-md mx-auto mt-12 px-4">
-        <Card className="p-8 border border-gray-100 shadow-xl rounded-2xl relative overflow-hidden">
+        <Card className="p-8 rounded-2xl relative overflow-hidden">
           {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-primary-light to-accent"></div>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-light to-accent"></div>
 
-          <h1 className="text-2xl font-bold text-primary mb-2 text-center mt-2">Create Account</h1>
+          <h1 className="text-2xl font-bold mb-2 text-center mt-2">Create Account</h1>
           <p className="text-sm text-muted text-center mb-6">Register to search and book flights instantly</p>
 
           {error && <Alert type="error" className="mb-4">{error}</Alert>}

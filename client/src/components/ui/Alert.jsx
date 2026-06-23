@@ -1,12 +1,12 @@
 export default function Alert({ children, type = 'info', className = '' }) {
   const types = {
-    info: 'bg-blue-50 text-blue-700 border-blue-200',
-    success: 'bg-green-50 text-success border-green-200',
-    warning: 'bg-amber-50 text-amber-700 border-amber-200',
-    error: 'bg-red-50 text-danger border-red-200',
+    info: 'bg-primary/10 text-primary-light border-primary/30',
+    success: 'bg-success/10 text-success border-success/30',
+    warning: 'bg-warning/10 text-warning border-warning/30',
+    error: 'bg-danger/10 text-danger border-danger/30',
   };
   return (
-    <div className={`border rounded-md px-4 py-3 text-sm ${types[type]} ${className}`}>
+    <div className={`border rounded-lg px-4 py-3 text-sm backdrop-blur-sm ${types[type]} ${className}`}>
       {children}
     </div>
   );

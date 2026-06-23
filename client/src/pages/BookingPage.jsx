@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Plane } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
@@ -15,7 +16,7 @@ export default function BookingPage() {
   const [flight, setFlight] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  
+
   const [passengerName, setPassengerName] = useState('');
   const [passengerAge, setPassengerAge] = useState('');
   const [selectedSeat, setSelectedSeat] = useState('');
@@ -64,9 +65,7 @@ export default function BookingPage() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex justify-center my-12">
-          <LoadingSpinner size="lg" />
-        </div>
+        <LoadingSpinner size="lg" />
       </Layout>
     );
   }
@@ -76,7 +75,9 @@ export default function BookingPage() {
       <Layout>
         <div className="max-w-2xl mx-auto">
           <Alert type="error">{error || 'Flight not found'}</Alert>
-          <Button className="mt-4" onClick={() => navigate('/flights')}>Back to Flights</Button>
+          <Button className="mt-4" onClick={() => navigate('/flights')}>
+            Back to Flights
+          </Button>
         </div>
       </Layout>
     );
@@ -85,28 +86,30 @@ export default function BookingPage() {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-primary mb-6">Book Flight {flight.flightNumber}</h1>
-        
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-6">
+          Book Flight <span className="text-accent">{flight.flightNumber}</span>
+        </h1>
+
         {bookingError && <Alert type="error" className="mb-6">{bookingError}</Alert>}
 
-        <Card className="p-6 mb-6 bg-blue-50 border border-blue-100">
+        <Card className="p-6 mb-6 border-accent/20">
           <div className="flex justify-between items-center">
             <div>
               <p className="text-sm text-muted">From</p>
               <p className="font-semibold">{flight.departureAirport}</p>
             </div>
-            <div className="text-xl">✈️</div>
+            <Plane className="w-5 h-5 text-accent" />
             <div className="text-right">
               <p className="text-sm text-muted">To</p>
               <p className="font-semibold">{flight.arrivalAirport}</p>
             </div>
           </div>
-          <div className="mt-4 flex justify-between items-end border-t border-blue-200 pt-4">
+          <div className="mt-4 flex justify-between items-end border-t border-white/10 pt-4">
             <div>
               <p className="text-sm text-muted">Price</p>
-              <p className="font-bold text-xl text-primary">${flight.price}</p>
+              <p className="font-bold text-xl text-accent">${flight.price}</p>
             </div>
-            <div>
+            <div className="text-right">
               <p className="text-sm text-muted">Date</p>
               <p className="font-medium">{new Date(flight.departureTime).toLocaleDateString()}</p>
             </div>
@@ -115,68 +118,77 @@ export default function BookingPage() {
 
         <form onSubmit={handleBooking}>
           <Card className="p-8 mb-6">
-            <h2 className="text-lg font-semibold text-primary mb-4">Passenger Details</h2>
-            <Input 
-              label="Passenger Name" 
-              placeholder="Full name as on ID" 
+            <h2 className="text-lg font-semibold mb-4">Passenger Details</h2>
+            <Input
+              label="Passenger Name"
+              placeholder="Full name as on ID"
               value={passengerName}
               onChange={(e) => setPassengerName(e.target.value)}
               required
             />
-            <Input 
-              label="Age" 
-              type="number" 
-              placeholder="Age (Optional)" 
+            <Input
+              label="Age"
+              type="number"
+              placeholder="Age (Optional)"
               value={passengerAge}
               onChange={(e) => setPassengerAge(e.target.value)}
             />
           </Card>
 
           <Card className="p-8 mb-6">
-            <h2 className="text-lg font-semibold text-primary mb-4">Seat Selection</h2>
-            <p className="text-muted text-sm mb-4">Select your preferred seat. Selected: <strong>{selectedSeat || 'None'}</strong></p>
-            
-            <div className="bg-gray-100 p-6 rounded-xl flex justify-center">
+            <h2 className="text-lg font-semibold mb-4">Seat Selection</h2>
+            <p className="text-muted text-sm mb-4">
+              Select your preferred seat. Selected:{' '}
+              <strong className="text-accent">{selectedSeat || 'None'}</strong>
+            </p>
+
+            <div className="glass rounded-xl p-6 flex justify-center">
               <div className="grid grid-cols-6 gap-3">
                 {Array.from({ length: 30 }, (_, i) => {
                   const row = Math.floor(i / 6) + 1;
                   const col = String.fromCharCode(65 + (i % 6));
                   const seatId = `${row}${col}`;
-                  
-                  // Mock some unavailable seats for visual flair
-                  const isUnavailable = (i % 7 === 0);
-                  
+                  const isUnavailable = i % 7 === 0;
+
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={seatId}
                       onClick={() => !isUnavailable && setSelectedSeat(seatId)}
-                      className={`h-10 w-10 sm:h-12 sm:w-12 rounded-t-lg rounded-b-sm flex items-center justify-center text-xs font-medium border-b-4 
+                      disabled={isUnavailable}
+                      className={`h-10 w-10 sm:h-12 sm:w-12 rounded-t-lg rounded-b-sm flex items-center justify-center text-xs font-semibold border-b-4 transition-all
                         ${
                           isUnavailable
-                            ? 'bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed'
+                            ? 'bg-white/5 border-white/10 text-muted/40 cursor-not-allowed'
                             : selectedSeat === seatId
-                            ? 'bg-primary border-primary-dark text-white cursor-pointer shadow-inner transform translate-y-1'
-                            : 'bg-white border-blue-200 text-primary hover:bg-blue-50 cursor-pointer shadow-sm'
-                        } transition-all`}
+                            ? 'bg-accent border-accent-dark text-surface cursor-pointer translate-y-1 shadow-glow-teal'
+                            : 'bg-surface-3/70 border-primary/40 text-foreground hover:bg-surface-3 cursor-pointer'
+                        }`}
                     >
                       {seatId}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
             </div>
-            
-            <div className="mt-6 flex justify-center gap-6 text-sm">
-              <div className="flex items-center gap-2"><div className="w-4 h-4 bg-white border border-blue-200 rounded-sm"></div> Available</div>
-              <div className="flex items-center gap-2"><div className="w-4 h-4 bg-primary rounded-sm"></div> Selected</div>
-              <div className="flex items-center gap-2"><div className="w-4 h-4 bg-gray-300 rounded-sm"></div> Unavailable</div>
+
+            <div className="mt-6 flex justify-center gap-6 text-sm text-muted">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-surface-3/70 border border-primary/40 rounded-sm" /> Available
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-accent rounded-sm" /> Selected
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 bg-white/5 border border-white/10 rounded-sm" /> Unavailable
+              </div>
             </div>
           </Card>
 
-          <Button 
-            type="submit" 
-            variant="accent" 
-            className="w-full py-4 text-xl shadow-lg hover:shadow-xl transition-shadow flex justify-center items-center gap-2"
+          <Button
+            type="submit"
+            variant="accent"
+            className="w-full py-4 text-lg"
             disabled={isSubmitting}
           >
             {isSubmitting ? <LoadingSpinner size="sm" /> : 'Confirm Booking'}

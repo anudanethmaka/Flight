@@ -59,11 +59,11 @@ export default function LoginPage() {
   return (
     <Layout>
       <div className="max-w-md mx-auto mt-12 px-4">
-        <Card className="p-8 border border-gray-100 shadow-xl rounded-2xl relative overflow-hidden">
+        <Card className="p-8 rounded-2xl relative overflow-hidden">
           {/* Accent decoration */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary via-primary-light to-accent"></div>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-light to-accent"></div>
           
-          <h1 className="text-2xl font-bold text-primary mb-2 text-center mt-2">Welcome Back</h1>
+          <h1 className="text-2xl font-bold mb-2 text-center mt-2">Welcome Back</h1>
           <p className="text-sm text-muted text-center mb-6">Log in to manage your flights and bookings</p>
           
           {error && <Alert type="error" className="mb-4">{error}</Alert>}
@@ -94,17 +94,17 @@ export default function LoginPage() {
 
           <div className="relative my-6 flex items-center justify-center">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full border-t border-white/10"></div>
             </div>
-            <span className="relative bg-white px-3 text-xs text-muted font-medium uppercase">Testing Sandbox</span>
+            <span className="relative bg-surface-2 px-3 text-xs text-muted font-medium uppercase">Testing Sandbox</span>
           </div>
 
           <button
             onClick={handleDemoAdmin}
             disabled={loading}
-            className="w-full bg-amber-50 border border-amber-200 text-amber-800 rounded-lg py-2.5 px-4 text-sm font-semibold hover:bg-amber-100 hover:border-amber-300 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full bg-warning/10 border border-warning/30 text-warning rounded-lg py-2.5 px-4 text-sm font-semibold hover:bg-warning/20 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            🔑 Quick Demo Login (Admin)
+            Quick Demo Login (Admin)
           </button>
           
           <p className="text-center text-sm text-muted mt-6">

@@ -18,7 +18,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/flights', require('./routes/flightRoutes'));
 app.use('/api/bookings', require('./routes/bookingRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
-// app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/chatbot', require('./routes/chatbotRoutes'));
 
 app.use(require('./middleware/errorMiddleware'));

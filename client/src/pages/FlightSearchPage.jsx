@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { Plane, ArrowRight } from 'lucide-react';
 import api from '../services/api';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
@@ -41,12 +42,18 @@ export default function FlightSearchPage() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-bold text-primary mb-6">Flight Search Results</h1>
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">Flight Search Results</h1>
+        {(from || to) && (
+          <p className="text-sm text-muted mt-1 flex items-center gap-2">
+            {from || 'Anywhere'} <ArrowRight className="w-3.5 h-3.5" /> {to || 'Anywhere'}
+            {date && <span className="text-muted/70">· {new Date(date).toLocaleDateString()}</span>}
+          </p>
+        )}
+      </div>
 
       {loading ? (
-        <div className="flex justify-center my-12">
-          <LoadingSpinner size="lg" />
-        </div>
+        <LoadingSpinner size="lg" />
       ) : error ? (
         <Alert type="error" className="mb-6">{error}</Alert>
       ) : flights.length === 0 ? (
@@ -54,21 +61,24 @@ export default function FlightSearchPage() {
       ) : (
         <div className="space-y-4">
           {flights.map((flight) => (
-            <Card key={flight._id} className="flex flex-col md:flex-row items-center justify-between p-6 gap-4">
+            <Card
+              key={flight._id}
+              className="flex flex-col md:flex-row items-center justify-between p-6 gap-4 hover:border-accent/30 transition-colors"
+            >
               <div className="w-full md:w-auto text-center md:text-left">
-                <p className="font-semibold text-primary">{flight.flightNumber}</p>
+                <p className="font-bold text-accent">{flight.flightNumber}</p>
                 <p className="text-sm text-muted">{flight.airline}</p>
               </div>
               <div className="flex w-full md:w-auto items-center justify-between md:justify-center gap-8">
                 <div className="text-center">
-                  <p className="font-medium">{flight.departureAirport}</p>
+                  <p className="font-semibold">{flight.departureAirport}</p>
                   <p className="text-xs text-muted">
                     {new Date(flight.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
-                <div className="text-muted text-lg">✈️</div>
+                <Plane className="w-5 h-5 text-accent rotate-90" />
                 <div className="text-center">
-                  <p className="font-medium">{flight.arrivalAirport}</p>
+                  <p className="font-semibold">{flight.arrivalAirport}</p>
                   <p className="text-xs text-muted">
                     {new Date(flight.arrivalTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
@@ -76,7 +86,7 @@ export default function FlightSearchPage() {
               </div>
               <div className="w-full md:w-auto flex items-center justify-between md:flex-col md:items-end gap-2">
                 <div className="text-left md:text-right">
-                  <p className="text-lg font-bold text-primary">${flight.price}</p>
+                  <p className="text-lg font-bold text-foreground">${flight.price}</p>
                   <p className={`text-xs ${flight.availableSeats > 0 ? 'text-success' : 'text-danger'}`}>
                     {flight.availableSeats} seats available
                   </p>
