@@ -95,11 +95,11 @@ export default function ProfilePage() {
   return (
     <Layout>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-primary mb-6">My Profile</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-6">My Profile</h1>
 
         {/* Personal Information */}
         <Card className="p-8 mb-6">
-          <h2 className="text-lg font-semibold text-primary mb-4">Personal Information</h2>
+          <h2 className="text-lg font-semibold mb-4">Personal Information</h2>
           {profileError && <Alert type="error" className="mb-4">{profileError}</Alert>}
           {profileSuccess && <Alert type="success" className="mb-4">{profileSuccess}</Alert>}
           
@@ -135,7 +135,7 @@ export default function ProfilePage() {
 
         {/* Change Password */}
         <Card className="p-8">
-          <h2 className="text-lg font-semibold text-primary mb-4">Change Password</h2>
+          <h2 className="text-lg font-semibold mb-4">Change Password</h2>
           {passwordError && <Alert type="error" className="mb-4">{passwordError}</Alert>}
           {passwordSuccess && <Alert type="success" className="mb-4">{passwordSuccess}</Alert>}
 

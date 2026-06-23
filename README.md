@@ -77,7 +77,7 @@ skylink/
    ```
 
 4. **Verify**
-   - Backend health check: http://localhost:5000/api/health
+   - Backend health check: http://localhost:5001/api/health
    - Frontend: http://localhost:5173
 
 ## Environment Variables
@@ -85,7 +85,7 @@ skylink/
 ### Server (`server/.env`)
 | Variable | Description |
 |---|---|
-| `PORT` | Server port (default: 5000) |
+| `PORT` | Server port (default: 5001) |
 | `MONGO_URI` | MongoDB connection string |
 | `JWT_SECRET` | Secret key for JWT signing |
 | `JWT_EXPIRES_IN` | Token expiry (e.g., `7d`) |
@@ -95,7 +95,7 @@ skylink/
 ### Client (`client/.env`)
 | Variable | Description |
 |---|---|
-| `VITE_API_URL` | Backend API URL (e.g., `http://localhost:5000/api`) |
+| `VITE_API_URL` | Backend API URL (e.g., `http://localhost:5001/api`) |
 
 ## Shared UI Components
 

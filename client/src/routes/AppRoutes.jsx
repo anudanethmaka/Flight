@@ -9,6 +9,7 @@ import BookingPage from '../pages/BookingPage';
 import UserDashboardPage from '../pages/UserDashboardPage';
 import AdminDashboardPage from '../pages/AdminDashboardPage';
 import ProfilePage from '../pages/ProfilePage';
+import NotificationsPage from '../pages/NotificationsPage';
 
 export default function AppRoutes() {
   return (
@@ -47,6 +48,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['user', 'admin']}>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute allowedRoles={['user', 'admin']}>
+            <NotificationsPage />
           </ProtectedRoute>
         }
       />

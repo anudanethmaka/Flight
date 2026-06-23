@@ -34,7 +34,7 @@ export default function UserDashboardPage() {
       const timer = setTimeout(() => {
         setSuccessMessage('');
         window.history.replaceState({}, document.title);
-      }, 5000);
+      }, 5001);
       return () => clearTimeout(timer);
     }
   }, [location.state]);
@@ -68,7 +68,7 @@ export default function UserDashboardPage() {
 
   return (
     <Layout>
-      <h1 className="text-2xl font-bold text-primary mb-6">My Dashboard</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-6">My Dashboard</h1>
       
       {successMessage && <Alert type="success" className="mb-6">{successMessage}</Alert>}
       {error && <Alert type="error" className="mb-6">{error}</Alert>}
@@ -77,20 +77,20 @@ export default function UserDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card className="p-6 text-center">
           <p className="text-sm text-muted">Total Bookings</p>
-          <p className="text-3xl font-bold text-primary">{bookings.length}</p>
+          <p className="text-3xl font-extrabold text-primary-light">{bookings.length}</p>
         </Card>
         <Card className="p-6 text-center">
           <p className="text-sm text-muted">Upcoming Flights</p>
-          <p className="text-3xl font-bold text-accent">{upcomingBookings.length}</p>
+          <p className="text-3xl font-extrabold text-accent">{upcomingBookings.length}</p>
         </Card>
         <Card className="p-6 text-center">
           <p className="text-sm text-muted">Cancelled</p>
-          <p className="text-3xl font-bold text-danger">{cancelledBookings.length}</p>
+          <p className="text-3xl font-extrabold text-danger">{cancelledBookings.length}</p>
         </Card>
       </div>
 
       {/* Recent Bookings */}
-      <h2 className="text-xl font-semibold text-primary mb-4">Recent Bookings</h2>
+      <h2 className="text-xl font-bold mb-4">Recent Bookings</h2>
       
       {bookings.length === 0 ? (
         <Card className="p-6">
@@ -103,12 +103,12 @@ export default function UserDashboardPage() {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <p className="font-semibold text-primary">{booking.bookingReference}</p>
+                    <p className="font-bold text-accent">{booking.bookingReference}</p>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
+                      className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                        booking.status === 'Confirmed' ? 'bg-success/15 text-success border-success/30' :
+                        booking.status === 'Cancelled' ? 'bg-danger/15 text-danger border-danger/30' :
+                        'bg-white/10 text-muted border-white/10'
                       }`}
                     >
                       {booking.status}
@@ -125,10 +125,10 @@ export default function UserDashboardPage() {
                   </p>
                 </div>
                 
-                <div className="text-left md:text-right w-full md:w-auto bg-gray-50 p-3 rounded-md">
-                  <p className="text-sm text-muted">Passenger: <span className="font-medium text-gray-800">{booking.passengerName}</span></p>
-                  <p className="text-sm text-muted">Seat: <span className="font-medium text-gray-800">{booking.seatNumber}</span></p>
-                  <p className="text-sm text-muted">Total: <span className="font-medium text-gray-800">${booking.totalPrice}</span></p>
+                <div className="text-left md:text-right w-full md:w-auto glass rounded-lg p-3">
+                  <p className="text-sm text-muted">Passenger: <span className="font-medium text-foreground">{booking.passengerName}</span></p>
+                  <p className="text-sm text-muted">Seat: <span className="font-medium text-foreground">{booking.seatNumber}</span></p>
+                  <p className="text-sm text-muted">Total: <span className="font-medium text-foreground">${booking.totalPrice}</span></p>
                 </div>
                 
                 {booking.status === 'Confirmed' && new Date(booking.flight.departureTime) > new Date() && (
