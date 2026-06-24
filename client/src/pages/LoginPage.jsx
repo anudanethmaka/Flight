@@ -39,22 +39,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoAdmin = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const { data } = await api.post('/auth/login', {
-        email: 'admin@skylink.com',
-        password: 'admin123',
-      });
-      login(data.token, data.user);
-      navigate('/admin');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Demo login failed. Please ensure the database is seeded.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   return (
     <Layout>
@@ -92,21 +77,6 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="relative my-6 flex items-center justify-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
-            </div>
-            <span className="relative bg-surface-2 px-3 text-xs text-muted font-medium uppercase">Testing Sandbox</span>
-          </div>
-
-          <button
-            onClick={handleDemoAdmin}
-            disabled={loading}
-            className="w-full bg-warning/10 border border-warning/30 text-warning rounded-lg py-2.5 px-4 text-sm font-semibold hover:bg-warning/20 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-          >
-            Quick Demo Login (Admin)
-          </button>
-          
           <p className="text-center text-sm text-muted mt-6">
             Don&apos;t have an account?{' '}
             <Link to="/register" className="text-primary-light hover:underline font-semibold">Register</Link>

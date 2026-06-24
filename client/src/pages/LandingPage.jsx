@@ -5,7 +5,6 @@ import {
   Plane,
   Search,
   CalendarDays,
-  MapPin,
   Ticket,
   BellRing,
   Sparkles,
@@ -13,6 +12,7 @@ import {
 } from 'lucide-react';
 import Layout from '../components/ui/Layout';
 import ChatWidget from '../components/chatbot/ChatWidget';
+import AirportInput from '../components/ui/AirportInput';
 
 const features = [
   {
@@ -55,15 +55,6 @@ export default function LandingPage() {
     if (date) params.set('date', date);
     navigate(`/flights?${params.toString()}`);
   };
-
-  const field = (label, Icon, node) => (
-    <div className="flex-1 min-w-0">
-      <label className="flex items-center gap-1.5 text-xs font-medium text-muted mb-1.5">
-        <Icon className="w-3.5 h-3.5" /> {label}
-      </label>
-      {node}
-    </div>
-  );
 
   const inputClass =
     'w-full bg-surface-2/70 border border-white/10 rounded-lg px-3.5 py-2.5 text-foreground placeholder:text-muted/60 focus:outline-none focus:border-accent/60 focus:ring-2 focus:ring-accent/30 transition-all';
@@ -121,38 +112,31 @@ export default function LandingPage() {
             className="mt-10 glass rounded-2xl border border-accent/20 shadow-glow p-4 md:p-5"
           >
             <div className="flex flex-col md:flex-row gap-4 md:items-end">
-              {field(
-                'From',
-                MapPin,
-                <input
-                  type="text"
-                  placeholder="Departure city"
+              <div className="flex-1 min-w-0">
+                <AirportInput
+                  label="From"
                   value={from}
-                  onChange={(e) => setFrom(e.target.value)}
-                  className={inputClass}
+                  onChange={setFrom}
+                  placeholder="Departure airport"
                 />
-              )}
-              {field(
-                'To',
-                MapPin,
-                <input
-                  type="text"
-                  placeholder="Arrival city"
+              </div>
+              <div className="flex-1 min-w-0">
+                <AirportInput
+                  label="To"
                   value={to}
-                  onChange={(e) => setTo(e.target.value)}
-                  className={inputClass}
+                  onChange={setTo}
+                  placeholder="Arrival airport"
                 />
-              )}
-              {field(
-                'Date',
-                CalendarDays,
+              </div>
+              <div className="flex-1 min-w-0">
+                <label className="block text-xs font-medium text-muted mb-1.5">Date</label>
                 <input
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                   className={inputClass}
                 />
-              )}
+              </div>
               <button
                 type="submit"
                 className="inline-flex items-center justify-center gap-2 bg-accent text-surface font-semibold px-6 py-2.5 rounded-lg hover:bg-accent-dark shadow-lg shadow-accent/30 hover:shadow-accent/50 transition-all md:mb-0"

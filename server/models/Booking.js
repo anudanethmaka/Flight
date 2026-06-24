@@ -14,5 +14,9 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Booking', bookingSchema);
+// Indexes for fast lookups
+bookingSchema.index({ user: 1 });
+bookingSchema.index({ flight: 1 });
+bookingSchema.index({ flight: 1, seatNumber: 1, status: 1 });
 
+module.exports = mongoose.model('Booking', bookingSchema);
