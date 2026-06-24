@@ -14,4 +14,8 @@ const notificationSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Index for fast per-user notification queries
+notificationSchema.index({ user: 1, isRead: 1 });
+notificationSchema.index({ user: 1, createdAt: -1 });
+
 module.exports = mongoose.model('Notification', notificationSchema);

@@ -74,7 +74,8 @@ export default function AdminDashboardPage() {
   const fetchFlights = useCallback(async () => {
     try {
       const { data } = await api.get('/flights');
-      setFlights(data);
+      // GET /flights returns a paginated object: { flights, total, page, pages }
+      setFlights(Array.isArray(data) ? data : data.flights || []);
     } catch (err) {
       console.error('Error fetching flights:', err);
       setError('Failed to fetch flights list.');
@@ -94,7 +95,8 @@ export default function AdminDashboardPage() {
   const fetchBookings = useCallback(async () => {
     try {
       const { data } = await api.get('/bookings');
-      setBookings(data);
+      // GET /bookings returns a paginated object: { bookings, total, page, pages }
+      setBookings(Array.isArray(data) ? data : data.bookings || []);
     } catch (err) {
       console.error('Error fetching bookings:', err);
       setError('Failed to fetch bookings list.');

@@ -1,197 +1,295 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plane } from 'lucide-react';
-import api from '../services/api';
+import { motion } from 'framer-motion';
+import { Plus, Minus, User, Plane, ArrowRight } from 'lucide-react';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
-import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import Alert from '../components/ui/Alert';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import api from '../services/api';
+
+const COLS  = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+function buildSeatGrid(totalSeats, bookedSeats) {
+  const seats = [];
+  const total = totalSeats || 30;
+  const rows = Math.ceil(total / COLS.length);
+  for (let r = 1; r <= rows; r++) {
+    COLS.forEach((c) => {
+      const id = `${r}${c}`;
+      const seatIndex = (r - 1) * COLS.length + COLS.indexOf(c);
+      if (seatIndex < total) {
+        seats.push({ id, booked: bookedSeats.includes(id) });
+      }
+    });
+  }
+  return seats;
+}
 
 export default function BookingPage() {
   const { flightId } = useParams();
   const navigate = useNavigate();
 
-  const [flight, setFlight] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [flight,      setFlight]      = useState(null);
+  const [bookedSeats, setBookedSeats] = useState([]);
+  const [loading,     setLoading]     = useState(true);
+  const [error,       setError]       = useState('');
 
-  const [passengerName, setPassengerName] = useState('');
-  const [passengerAge, setPassengerAge] = useState('');
-  const [selectedSeat, setSelectedSeat] = useState('');
-  const [bookingError, setBookingError] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Multi-passenger state
+  const [passengerCount, setPassengerCount] = useState(1);
+  const [passengers, setPassengers] = useState([
+    { passengerName: '', passengerAge: '', seatNumber: '' },
+  ]);
 
+  // Load flight + real booked seats
   useEffect(() => {
-    const fetchFlight = async () => {
+    async function load() {
       try {
-        const { data } = await api.get(`/flights/${flightId}`);
-        setFlight(data);
-      } catch (err) {
+        const [flightRes, seatsRes] = await Promise.all([
+          api.get(`/flights/${flightId}`),
+          api.get(`/flights/${flightId}/seats`),
+        ]);
+        setFlight(flightRes.data);
+        setBookedSeats(seatsRes.data || []);
+      } catch {
         setError('Failed to load flight details.');
       } finally {
         setLoading(false);
       }
-    };
-    fetchFlight();
+    }
+    load();
   }, [flightId]);
 
-  const handleBooking = async (e) => {
-    e.preventDefault();
-    if (!passengerName || !selectedSeat) {
-      setBookingError('Please provide passenger name and select a seat.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setBookingError('');
-
-    try {
-      await api.post('/bookings', {
-        flightId,
-        passengerName,
-        passengerAge,
-        seatNumber: selectedSeat,
-      });
-      navigate('/dashboard', { state: { message: 'Booking successful!' } });
-    } catch (err) {
-      setBookingError(err.response?.data?.message || 'Failed to complete booking.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  // Sync passenger array when count changes
+  const changeCount = (delta) => {
+    const next = Math.max(1, Math.min(6, passengerCount + delta));
+    setPassengerCount(next);
+    setPassengers((prev) => {
+      if (next > prev.length) {
+        return [...prev, ...Array(next - prev.length).fill({ passengerName: '', passengerAge: '', seatNumber: '' })];
+      }
+      return prev.slice(0, next);
+    });
   };
 
-  if (loading) {
-    return (
-      <Layout>
-        <LoadingSpinner size="lg" />
-      </Layout>
-    );
-  }
+  const updatePassenger = (idx, field, value) => {
+    setPassengers((prev) => prev.map((p, i) => i === idx ? { ...p, [field]: value } : p));
+  };
 
-  if (error || !flight) {
-    return (
-      <Layout>
-        <div className="max-w-2xl mx-auto">
-          <Alert type="error">{error || 'Flight not found'}</Alert>
-          <Button className="mt-4" onClick={() => navigate('/flights')}>
-            Back to Flights
-          </Button>
-        </div>
-      </Layout>
-    );
-  }
+  const selectSeat = (idx, seatId) => {
+    // Prevent selecting a seat already chosen by another passenger in this booking
+    const alreadyChosen = passengers.some((p, i) => i !== idx && p.seatNumber === seatId);
+    if (alreadyChosen) return;
+    updatePassenger(idx, 'seatNumber', seatId);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setError('');
+
+    // Validate all passengers
+    for (let i = 0; i < passengers.length; i++) {
+      if (!passengers[i].passengerName.trim()) {
+        return setError(`Passenger ${i + 1}: name is required.`);
+      }
+      if (!passengers[i].seatNumber) {
+        return setError(`Passenger ${i + 1}: please select a seat.`);
+      }
+    }
+
+    // Check duplicate seats across passengers
+    const seats = passengers.map((p) => p.seatNumber);
+    if (new Set(seats).size !== seats.length) {
+      return setError('Each passenger must have a different seat.');
+    }
+
+    if (flight.availableSeats < passengers.length) {
+      return setError(`Only ${flight.availableSeats} seat(s) available.`);
+    }
+
+    // Navigate to payment page with booking details in state
+    navigate('/payment', {
+      state: {
+        flightId,
+        flight,
+        passengers,
+        totalAmount: flight.price * passengers.length,
+      },
+    });
+  };
+
+  if (loading) return <Layout><LoadingSpinner /></Layout>;
+  if (error && !flight) return <Layout><Alert type="error" message={error} /></Layout>;
+
+  const seats = buildSeatGrid(flight?.totalSeats || 30, bookedSeats);
+  const rowCount = Math.ceil((flight?.totalSeats || 30) / COLS.length);
 
   return (
     <Layout>
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight mb-6">
-          Book Flight <span className="text-accent">{flight.flightNumber}</span>
-        </h1>
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-2xl font-bold text-foreground mb-6">Book Your Flight</h1>
 
-        {bookingError && <Alert type="error" className="mb-6">{bookingError}</Alert>}
+        {error && <Alert type="error" message={error} className="mb-4" />}
 
-        <Card className="p-6 mb-6 border-accent/20">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-sm text-muted">From</p>
-              <p className="font-semibold">{flight.departureAirport}</p>
-            </div>
-            <Plane className="w-5 h-5 text-accent" />
-            <div className="text-right">
-              <p className="text-sm text-muted">To</p>
-              <p className="font-semibold">{flight.arrivalAirport}</p>
-            </div>
-          </div>
-          <div className="mt-4 flex justify-between items-end border-t border-white/10 pt-4">
-            <div>
-              <p className="text-sm text-muted">Price</p>
-              <p className="font-bold text-xl text-accent">${flight.price}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-muted">Date</p>
-              <p className="font-medium">{new Date(flight.departureTime).toLocaleDateString()}</p>
-            </div>
-          </div>
-        </Card>
-
-        <form onSubmit={handleBooking}>
-          <Card className="p-8 mb-6">
-            <h2 className="text-lg font-semibold mb-4">Passenger Details</h2>
-            <Input
-              label="Passenger Name"
-              placeholder="Full name as on ID"
-              value={passengerName}
-              onChange={(e) => setPassengerName(e.target.value)}
-              required
-            />
-            <Input
-              label="Age"
-              type="number"
-              placeholder="Age (Optional)"
-              value={passengerAge}
-              onChange={(e) => setPassengerAge(e.target.value)}
-            />
-          </Card>
-
-          <Card className="p-8 mb-6">
-            <h2 className="text-lg font-semibold mb-4">Seat Selection</h2>
-            <p className="text-muted text-sm mb-4">
-              Select your preferred seat. Selected:{' '}
-              <strong className="text-accent">{selectedSeat || 'None'}</strong>
-            </p>
-
-            <div className="glass rounded-xl p-6 flex justify-center">
-              <div className="grid grid-cols-6 gap-3">
-                {Array.from({ length: 30 }, (_, i) => {
-                  const row = Math.floor(i / 6) + 1;
-                  const col = String.fromCharCode(65 + (i % 6));
-                  const seatId = `${row}${col}`;
-                  const isUnavailable = i % 7 === 0;
-
-                  return (
-                    <button
-                      type="button"
-                      key={seatId}
-                      onClick={() => !isUnavailable && setSelectedSeat(seatId)}
-                      disabled={isUnavailable}
-                      className={`h-10 w-10 sm:h-12 sm:w-12 rounded-t-lg rounded-b-sm flex items-center justify-center text-xs font-semibold border-b-4 transition-all
-                        ${
-                          isUnavailable
-                            ? 'bg-white/5 border-white/10 text-muted/40 cursor-not-allowed'
-                            : selectedSeat === seatId
-                            ? 'bg-accent border-accent-dark text-surface cursor-pointer translate-y-1 shadow-glow-teal'
-                            : 'bg-surface-3/70 border-primary/40 text-foreground hover:bg-surface-3 cursor-pointer'
-                        }`}
-                    >
-                      {seatId}
-                    </button>
-                  );
-                })}
+        {/* Flight summary */}
+        {flight && (
+          <Card className="mb-6">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-accent/10">
+                  <Plane className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground">{flight.airline} · {flight.flightNumber}</p>
+                  <div className="flex items-center gap-2 text-sm text-muted">
+                    <span>{flight.departureAirport}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                    <span>{flight.arrivalAirport}</span>
+                    <span>·</span>
+                    <span>{new Date(flight.departureTime).toLocaleDateString([], { dateStyle: 'medium' })}</span>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div className="mt-6 flex justify-center gap-6 text-sm text-muted">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-surface-3/70 border border-primary/40 rounded-sm" /> Available
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-accent rounded-sm" /> Selected
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 bg-white/5 border border-white/10 rounded-sm" /> Unavailable
+              <div className="text-right">
+                <p className="text-xl font-bold text-accent">${flight.price} <span className="text-sm font-normal text-muted">/ person</span></p>
+                <p className="text-xs text-muted">{flight.availableSeats} seats remaining</p>
               </div>
             </div>
           </Card>
+        )}
 
-          <Button
-            type="submit"
-            variant="accent"
-            className="w-full py-4 text-lg"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? <LoadingSpinner size="sm" /> : 'Confirm Booking'}
+        <form onSubmit={handleSubmit}>
+          {/* Passenger count */}
+          <Card className="mb-6">
+            <h2 className="text-sm font-semibold text-foreground mb-4">Number of Passengers</h2>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => changeCount(-1)}
+                disabled={passengerCount <= 1}
+                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-foreground hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <Minus className="w-4 h-4" />
+              </button>
+              <span className="text-2xl font-bold text-foreground w-8 text-center">{passengerCount}</span>
+              <button
+                type="button"
+                onClick={() => changeCount(1)}
+                disabled={passengerCount >= Math.min(6, flight?.availableSeats || 6)}
+                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-foreground hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+              <span className="text-sm text-muted">passenger{passengerCount > 1 ? 's' : ''}</span>
+              <span className="ml-auto text-accent font-bold text-lg">
+                Total: ${(flight?.price || 0) * passengerCount}
+              </span>
+            </div>
+          </Card>
+
+          {/* Per-passenger forms */}
+          {passengers.map((p, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: idx * 0.05 }}
+            >
+              <Card className="mb-6">
+                <h2 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <User className="w-4 h-4 text-accent" />
+                  Passenger {idx + 1}
+                </h2>
+
+                {/* Passenger details */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                  <div>
+                    <label className="block text-xs font-medium text-muted mb-1.5">Full Name *</label>
+                    <input
+                      type="text"
+                      value={p.passengerName}
+                      onChange={(e) => updatePassenger(idx, 'passengerName', e.target.value)}
+                      placeholder="As on travel document"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-accent transition-colors"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted mb-1.5">Age (optional)</label>
+                    <input
+                      type="number"
+                      min="1" max="120"
+                      value={p.passengerAge}
+                      onChange={(e) => updatePassenger(idx, 'passengerAge', e.target.value)}
+                      placeholder="e.g. 28"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:border-accent transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Seat map */}
+                <div>
+                  <p className="text-xs font-medium text-muted mb-3">
+                    Select Seat {p.seatNumber && <span className="text-accent ml-1">— {p.seatNumber} selected</span>}
+                  </p>
+                  <div className="flex gap-3 text-xs text-muted mb-3">
+                    <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-accent/20 border border-accent inline-block" /> Available</span>
+                    <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-accent inline-block" /> Selected</span>
+                    <span className="flex items-center gap-1.5"><span className="w-4 h-4 rounded bg-white/5 border border-white/10 opacity-40 inline-block" /> Unavailable</span>
+                  </div>
+
+                  {/* Column headers */}
+                  <div className="mb-2">
+                    <div className="grid gap-1" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
+                      <div /> {/* row number spacer */}
+                      {COLS.map((c) => (
+                        <div key={c} className="text-center text-[10px] text-muted font-semibold">{c}</div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Seat rows */}
+                  {Array.from({ length: rowCount }, (_, r) => {
+                    const rowSeats = seats.filter((s) => s.id.startsWith(`${r + 1}`));
+                    return (
+                      <div key={r} className="grid gap-1 mb-1" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
+                        <div className="flex items-center justify-center text-[10px] text-muted">{r + 1}</div>
+                        {rowSeats.map((seat) => {
+                          const isBooked   = seat.booked;
+                          const isSelected = p.seatNumber === seat.id;
+                          const takenByOther = passengers.some((op, oi) => oi !== idx && op.seatNumber === seat.id);
+                          const disabled   = isBooked || takenByOther;
+
+                          return (
+                            <button
+                              key={seat.id}
+                              type="button"
+                              onClick={() => !disabled && selectSeat(idx, seat.id)}
+                              disabled={disabled}
+                              className={`h-8 rounded text-[11px] font-medium transition-all border ${
+                                isSelected
+                                  ? 'bg-accent text-surface border-accent shadow-glow-teal'
+                                  : disabled
+                                    ? 'bg-white/5 border-white/5 text-white/20 cursor-not-allowed'
+                                    : 'bg-accent/10 border-accent/30 text-accent hover:bg-accent/20 cursor-pointer'
+                              }`}
+                            >
+                              {seat.id}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            </motion.div>
+          ))}
+
+          {/* Submit */}
+          <Button type="submit" className="w-full" variant="primary">
+            Proceed to Payment — ${(flight?.price || 0) * passengerCount}
           </Button>
         </form>
       </div>
