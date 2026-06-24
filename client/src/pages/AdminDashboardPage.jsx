@@ -44,6 +44,7 @@ export default function AdminDashboardPage() {
   // Modals / Forms States
   const [flightModalOpen, setFlightModalOpen] = useState(false);
   const [currentFlight, setCurrentFlight] = useState(null);
+  const [flightFormError, setFlightFormError] = useState('');
   const [flightForm, setFlightForm] = useState({
     flightNumber: '',
     airline: '',
@@ -143,6 +144,7 @@ export default function AdminDashboardPage() {
 
   const openAddFlightModal = () => {
     setCurrentFlight(null);
+    setFlightFormError('');
     setFlightForm({
       flightNumber: '',
       airline: '',
@@ -159,6 +161,7 @@ export default function AdminDashboardPage() {
 
   const openEditFlightModal = (flight) => {
     setCurrentFlight(flight);
+    setFlightFormError('');
     const formatDateTime = (dateStr) => {
       const d = new Date(dateStr);
       const pad = (num) => String(num).padStart(2, '0');
@@ -179,9 +182,21 @@ export default function AdminDashboardPage() {
     setFlightModalOpen(true);
   };
 
+  const closeFlightModal = () => {
+    setFlightModalOpen(false);
+    setFlightFormError('');
+  };
+
   const handleFlightSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setFlightFormError('');
+
+    if (new Date(flightForm.arrivalTime) <= new Date(flightForm.departureTime)) {
+      setFlightFormError('Arrival time must be after departure time.');
+      return;
+    }
+
     try {
       if (currentFlight) {
         const { data } = await api.put(`/flights/${currentFlight._id}`, flightForm);
@@ -192,11 +207,11 @@ export default function AdminDashboardPage() {
         setFlights([data, ...flights]);
         showSuccess(`Flight ${flightForm.flightNumber} successfully created.`);
       }
-      setFlightModalOpen(false);
+      closeFlightModal();
       fetchStats();
     } catch (err) {
       console.error('Error submitting flight form:', err);
-      setError(err.response?.data?.message || 'Failed to save flight details. Make sure the flight number is unique.');
+      setFlightFormError(err.response?.data?.message || 'Failed to save flight details. Make sure the flight number is unique.');
     }
   };
 
@@ -888,7 +903,7 @@ export default function AdminDashboardPage() {
                 {currentFlight ? `Edit Flight ${currentFlight.flightNumber}` : 'Add New Flight Schedule'}
               </h3>
               <button
-                onClick={() => setFlightModalOpen(false)}
+                onClick={closeFlightModal}
                 className="text-muted hover:text-foreground transition-colors cursor-pointer"
                 aria-label="Close"
               >
@@ -897,6 +912,8 @@ export default function AdminDashboardPage() {
             </div>
 
             <form onSubmit={handleFlightSubmit} className="p-6 space-y-4">
+              {flightFormError && <Alert type="error">{flightFormError}</Alert>}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
                   label="Flight Number"
@@ -982,7 +999,7 @@ export default function AdminDashboardPage() {
               </div>
 
               <div className="flex justify-end items-center gap-3 pt-4 border-t border-white/10">
-                <Button type="button" variant="secondary" onClick={() => setFlightModalOpen(false)}>
+                <Button type="button" variant="secondary" onClick={closeFlightModal}>
                   Cancel
                 </Button>
                 <Button type="submit">{currentFlight ? 'Save Updates' : 'Publish Schedule'}</Button>
