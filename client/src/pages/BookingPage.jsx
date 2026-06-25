@@ -20,7 +20,7 @@ function buildSeatGrid(totalSeats, bookedSeats) {
       const id = `${r}${c}`;
       const seatIndex = (r - 1) * COLS.length + COLS.indexOf(c);
       if (seatIndex < total) {
-        seats.push({ id, booked: bookedSeats.includes(id) });
+        seats.push({ id, row: r, booked: bookedSeats.includes(id) });
       }
     });
   }
@@ -251,7 +251,7 @@ export default function BookingPage() {
 
                   {/* Seat rows */}
                   {Array.from({ length: rowCount }, (_, r) => {
-                    const rowSeats = seats.filter((s) => s.id.startsWith(`${r + 1}`));
+                    const rowSeats = seats.filter((s) => s.row === r + 1);
                     return (
                       <div key={r} className="grid gap-1 mb-1" style={{ gridTemplateColumns: 'repeat(7, minmax(0, 1fr))' }}>
                         <div className="flex items-center justify-center text-[10px] text-muted">{r + 1}</div>

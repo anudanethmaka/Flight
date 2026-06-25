@@ -21,7 +21,7 @@ api.interceptors.response.use(
       localStorage.removeItem('user');
       // Only redirect to login if the user was previously authenticated
       // (had a stored token). Avoids spurious redirects on public requests.
-      if (hadToken && !window.location.pathname.startsWith('/login')) {
+      if (hadToken && !error.config?.skipAuthRedirect && !window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
     }

@@ -16,6 +16,8 @@
     "vite": "^8.0.12"
   },
   "dependencies": {
+    "@stripe/react-stripe-js": "^6.6.0",
+    "@stripe/stripe-js": "^9.8.0",
     "axios": "^1.17.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^1.21.0",
