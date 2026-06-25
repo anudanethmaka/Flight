@@ -1,11 +1,16 @@
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 // Decode a JWT without a library and check if it's expired
 function isTokenValid(token) {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const base64 = token
+      .split('.')[1]
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')));
     // exp is in seconds; Date.now() is in milliseconds
     return payload.exp * 1000 > Date.now();
   } catch {
@@ -13,30 +18,67 @@ function isTokenValid(token) {
   }
 }
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const token = localStorage.getItem('token');
-    const stored = localStorage.getItem('user');
+function clearStoredAuth() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+}
 
-    // If there is no token, or the token is expired/invalid, clear storage and start fresh
+function normalizeUser(userData) {
+  if (!userData) return null;
+  return {
+    id: userData.id || userData._id,
+    name: userData.name,
+    email: userData.email,
+    phone: userData.phone,
+    role: userData.role,
+    isActive: userData.isActive,
+  };
+}
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    const token = localStorage.getItem('token');
+
     if (!token || !isTokenValid(token)) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      return null;
+      clearStoredAuth();
+      setAuthLoading(false);
+      return undefined;
     }
 
-    return stored ? JSON.parse(stored) : null;
-  });
+    api.get('/auth/me', { skipAuthRedirect: true })
+      .then(({ data }) => {
+        if (cancelled) return;
+        const currentUser = normalizeUser(data);
+        localStorage.setItem('user', JSON.stringify(currentUser));
+        setUser(currentUser);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        clearStoredAuth();
+        setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setAuthLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const login = (token, userData) => {
+    const currentUser = normalizeUser(userData);
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(currentUser));
+    setUser(currentUser);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearStoredAuth();
     setUser(null);
   };
 
@@ -47,7 +89,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser }}>
+    <AuthContext.Provider value={{ user, authLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );
