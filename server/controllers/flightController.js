@@ -1,6 +1,23 @@
 const Flight = require('../models/Flight');
 const Booking = require('../models/Booking');
 
+const sendDuplicateFlightNumberError = (err, res) => {
+  if (err.code !== 11000 || !err.keyPattern?.flightNumber) return false;
+
+  const duplicateFlightNumber = err.keyValue?.flightNumber;
+  const message = duplicateFlightNumber
+    ? `Flight number ${duplicateFlightNumber} already exists. Please use a different flight number.`
+    : 'This flight number already exists. Please use a different flight number.';
+
+  res.status(409).json({ message });
+  return true;
+};
+
+const isValidFlightDateInput = (dateValue) => {
+  const value = String(dateValue);
+  return /^\d{4}-\d{2}-\d{2}T/.test(value) && !Number.isNaN(new Date(value).getTime());
+};
+
 // ─── GET all flights (with pagination) ────────────────────────────────────────
 exports.getFlights = async (req, res, next) => {
   try {
@@ -95,6 +112,9 @@ exports.createFlight = async (req, res, next) => {
         !departureTime || !arrivalTime || !totalSeats || !price) {
       return res.status(400).json({ message: 'All flight fields are required' });
     }
+    if (!isValidFlightDateInput(departureTime) || !isValidFlightDateInput(arrivalTime)) {
+      return res.status(400).json({ message: 'Please enter valid departure and arrival dates with a 4-digit year' });
+    }
     if (Number(price) <= 0 || Number(totalSeats) <= 0) {
       return res.status(400).json({ message: 'Price and seats must be positive numbers' });
     }
@@ -113,6 +133,7 @@ exports.createFlight = async (req, res, next) => {
 
     res.status(201).json(flight);
   } catch (err) {
+    if (sendDuplicateFlightNumberError(err, res)) return;
     next(err);
   }
 };
@@ -132,6 +153,12 @@ exports.updateFlight = async (req, res, next) => {
     // Validate dates if both provided
     const depTime = req.body.departureTime || flight.departureTime;
     const arrTime = req.body.arrivalTime   || flight.arrivalTime;
+    if (
+      (req.body.departureTime && !isValidFlightDateInput(req.body.departureTime)) ||
+      (req.body.arrivalTime && !isValidFlightDateInput(req.body.arrivalTime))
+    ) {
+      return res.status(400).json({ message: 'Please enter valid departure and arrival dates with a 4-digit year' });
+    }
     if (new Date(arrTime) <= new Date(depTime)) {
       return res.status(400).json({ message: 'Arrival time must be after departure time' });
     }
@@ -144,6 +171,7 @@ exports.updateFlight = async (req, res, next) => {
 
     res.json(updatedFlight);
   } catch (err) {
+    if (sendDuplicateFlightNumberError(err, res)) return;
     next(err);
   }
 };

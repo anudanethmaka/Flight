@@ -25,6 +25,30 @@ import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
+const DATETIME_LOCAL_MIN = '1000-01-01T00:00';
+const DATETIME_LOCAL_MAX = '9999-12-31T23:59';
+
+const normalizeDateTimeLocalValue = (value) => {
+  if (!value) return value;
+  return value.replace(/^(\d{4})\d+(-)/, '$1$2');
+};
+
+const getFlightSubmitErrorMessage = (err, fallbackFlightNumber) => {
+  const apiMessage = err.response?.data?.message || '';
+  const duplicateFlightNumber =
+    apiMessage.match(/flightNumber:\s*"([^"]+)"/)?.[1] || fallbackFlightNumber;
+
+  if (
+    err.response?.status === 409 ||
+    apiMessage.includes('E11000') ||
+    apiMessage.toLowerCase().includes('duplicate key')
+  ) {
+    return `Flight number ${duplicateFlightNumber} already exists. Please use a different flight number.`;
+  }
+
+  return apiMessage || 'Failed to save flight details. Make sure the flight number is unique.';
+};
+
 export default function AdminDashboardPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -187,6 +211,16 @@ export default function AdminDashboardPage() {
     setFlightFormError('');
   };
 
+  const handleDateTimeFieldChange = (field) => (e) => {
+    const normalizedValue = normalizeDateTimeLocalValue(e.target.value);
+
+    if (normalizedValue !== e.target.value) {
+      e.target.value = normalizedValue;
+    }
+
+    setFlightForm((prevForm) => ({ ...prevForm, [field]: normalizedValue }));
+  };
+
   const handleFlightSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -211,7 +245,7 @@ export default function AdminDashboardPage() {
       fetchStats();
     } catch (err) {
       console.error('Error submitting flight form:', err);
-      setFlightFormError(err.response?.data?.message || 'Failed to save flight details. Make sure the flight number is unique.');
+      setFlightFormError(getFlightSubmitErrorMessage(err, flightForm.flightNumber));
     }
   };
 
@@ -952,15 +986,19 @@ export default function AdminDashboardPage() {
                 <Input
                   label="Departure Date & Time"
                   type="datetime-local"
+                  min={DATETIME_LOCAL_MIN}
+                  max={DATETIME_LOCAL_MAX}
                   value={flightForm.departureTime}
-                  onChange={(e) => setFlightForm({ ...flightForm, departureTime: e.target.value })}
+                  onChange={handleDateTimeFieldChange('departureTime')}
                   required
                 />
                 <Input
                   label="Arrival Date & Time"
                   type="datetime-local"
+                  min={DATETIME_LOCAL_MIN}
+                  max={DATETIME_LOCAL_MAX}
                   value={flightForm.arrivalTime}
-                  onChange={(e) => setFlightForm({ ...flightForm, arrivalTime: e.target.value })}
+                  onChange={handleDateTimeFieldChange('arrivalTime')}
                   required
                 />
               </div>
