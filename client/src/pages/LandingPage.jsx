@@ -62,11 +62,14 @@ export default function LandingPage() {
   return (
     <Layout>
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-3xl glass-strong glow-border px-6 py-16 md:px-14 md:py-24 mb-16">
-        {/* Ambient accents */}
-        <div className="pointer-events-none absolute -top-24 -right-16 w-80 h-80 rounded-full bg-primary/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-16 w-72 h-72 rounded-full bg-accent/20 blur-3xl" />
-        <Plane className="pointer-events-none absolute top-10 right-10 w-40 h-40 text-white/[0.04] rotate-45 animate-float" />
+      <section className="relative z-20 rounded-3xl glass-strong glow-border px-6 py-16 md:px-14 md:py-24 mb-16">
+        {/* Background container to isolate overflow-hidden for ambient blurs */}
+        <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+          {/* Ambient accents */}
+          <div className="absolute -top-24 -right-16 w-80 h-80 rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute -bottom-24 -left-16 w-72 h-72 rounded-full bg-accent/20 blur-3xl" />
+          <Plane className="absolute top-10 right-10 w-40 h-40 text-white/[0.04] rotate-45 animate-float" />
+        </div>
 
         <div className="relative z-10 max-w-3xl">
           <motion.span
