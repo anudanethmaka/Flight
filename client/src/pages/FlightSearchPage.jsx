@@ -92,7 +92,7 @@ export default function FlightSearchPage() {
   return (
     <Layout>
       {/* ─── Re-search form ────────────────────────────────────────────────── */}
-      <Card className="mb-6">
+      <Card className="mb-6 relative z-20">
         <form onSubmit={handleSearch}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <AirportInput label="From" value={from} onChange={setFrom} placeholder="Departure airport" />
