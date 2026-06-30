@@ -133,11 +133,11 @@ export default function FlightSearchPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-accent transition-colors"
+                className="w-full bg-[#0f172a] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-accent transition-colors cursor-pointer"
               >
-                <option value="departure">Earliest Departure</option>
-                <option value="price_asc">Price: Low → High</option>
-                <option value="price_desc">Price: High → Low</option>
+                <option value="departure" className="bg-[#0f172a] text-white">Earliest Departure</option>
+                <option value="price_asc" className="bg-[#0f172a] text-white">Price: Low → High</option>
+                <option value="price_desc" className="bg-[#0f172a] text-white">Price: High → Low</option>
               </select>
             </div>
 
@@ -147,12 +147,12 @@ export default function FlightSearchPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-accent transition-colors"
+                className="w-full bg-[#0f172a] border border-white/10 rounded-xl px-3 py-2.5 text-sm text-foreground outline-none focus:border-accent transition-colors cursor-pointer"
               >
-                <option value="all">All Statuses</option>
-                <option value="Scheduled">Scheduled</option>
-                <option value="Boarding">Boarding</option>
-                <option value="Delayed">Delayed</option>
+                <option value="all" className="bg-[#0f172a] text-white">All Statuses</option>
+                <option value="Scheduled" className="bg-[#0f172a] text-white">Scheduled</option>
+                <option value="Boarding" className="bg-[#0f172a] text-white">Boarding</option>
+                <option value="Delayed" className="bg-[#0f172a] text-white">Delayed</option>
               </select>
             </div>
 

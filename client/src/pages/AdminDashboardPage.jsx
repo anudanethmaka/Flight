@@ -1023,15 +1023,15 @@ export default function AdminDashboardPage() {
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-muted mb-1.5">Status</label>
                   <select
-                    className="w-full bg-surface-2/60 border border-white/10 rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/30 transition-all"
+                    className="w-full bg-[#0f172a] border border-white/10 rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:border-accent/50 focus:ring-2 focus:ring-accent/30 transition-all cursor-pointer"
                     value={flightForm.status}
                     onChange={(e) => setFlightForm({ ...flightForm, status: e.target.value })}
                   >
-                    <option value="Scheduled">Scheduled</option>
-                    <option value="Boarding">Boarding</option>
-                    <option value="Delayed">Delayed</option>
-                    <option value="Cancelled">Cancelled</option>
-                    <option value="Completed">Completed</option>
+                    <option value="Scheduled" className="bg-[#0f172a] text-white">Scheduled</option>
+                    <option value="Boarding" className="bg-[#0f172a] text-white">Boarding</option>
+                    <option value="Delayed" className="bg-[#0f172a] text-white">Delayed</option>
+                    <option value="Cancelled" className="bg-[#0f172a] text-white">Cancelled</option>
+                    <option value="Completed" className="bg-[#0f172a] text-white">Completed</option>
                   </select>
                 </div>
               </div>
