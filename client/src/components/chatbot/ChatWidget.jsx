@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Sparkles, X, Send, Plane } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
 
 export default function ChatWidget() {
@@ -79,13 +80,28 @@ export default function ChatWidget() {
               {messages.map((m, i) => (
                 <div key={i} className={m.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
                   <span
-                    className={`inline-block px-3.5 py-2 rounded-2xl max-w-[85%] whitespace-pre-wrap ${
+                    className={`inline-block px-3.5 py-2 rounded-2xl max-w-[85%] ${
                       m.role === 'user'
-                        ? 'bg-accent text-surface rounded-br-sm font-medium'
-                        : 'glass border border-white/10 text-foreground rounded-bl-sm'
+                        ? 'bg-accent text-surface rounded-br-sm font-medium whitespace-pre-wrap'
+                        : 'glass border border-white/10 text-foreground rounded-bl-sm text-sm'
                     }`}
                   >
-                    {m.text}
+                    {m.role === 'user' ? (
+                      m.text
+                    ) : (
+                      <ReactMarkdown
+                        components={{
+                          p: ({node, ...props}) => <p className="mb-1.5 last:mb-0" {...props} />,
+                          ul: ({node, ...props}) => <ul className="list-disc pl-4 mb-1.5 space-y-0.5" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal pl-4 mb-1.5 space-y-0.5" {...props} />,
+                          li: ({node, ...props}) => <li className="mb-0.5" {...props} />,
+                          strong: ({node, ...props}) => <strong className="font-semibold text-accent-foreground" {...props} />,
+                          a: ({node, ...props}) => <a className="text-accent underline hover:text-accent-dark transition-colors" {...props} />
+                        }}
+                      >
+                        {m.text}
+                      </ReactMarkdown>
+                    )}
                   </span>
                 </div>
               ))}
