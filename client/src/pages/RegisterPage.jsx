@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
@@ -16,6 +16,7 @@ export default function RegisterPage() {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -33,7 +34,8 @@ export default function RegisterPage() {
       login(data.token, data.user);
       setSuccess('Account created successfully! Redirecting...');
       setTimeout(() => {
-        navigate('/dashboard');
+        const from = location.state?.from || '/dashboard';
+        navigate(from, { replace: true });
       }, 1500);
     } catch (err) {
       console.error('Registration error:', err);
@@ -102,7 +104,7 @@ export default function RegisterPage() {
           
           <p className="text-center text-sm text-muted mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary-light hover:underline font-semibold">Sign In</Link>
+            <Link to="/login" state={{ from: location.state?.from }} className="text-primary-light hover:underline font-semibold">Sign In</Link>
           </p>
         </Card>
       </div>

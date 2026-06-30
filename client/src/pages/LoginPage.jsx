@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/ui/Layout';
 import Card from '../components/ui/Card';
@@ -16,6 +16,7 @@ export default function LoginPage() {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +30,8 @@ export default function LoginPage() {
       if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
-        navigate('/dashboard');
+        const from = location.state?.from || '/dashboard';
+        navigate(from, { replace: true });
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -79,7 +81,7 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-muted mt-6">
             Don&apos;t have an account?{' '}
-            <Link to="/register" className="text-primary-light hover:underline font-semibold">Register</Link>
+            <Link to="/register" state={{ from: location.state?.from }} className="text-primary-light hover:underline font-semibold">Register</Link>
           </p>
         </Card>
       </div>
